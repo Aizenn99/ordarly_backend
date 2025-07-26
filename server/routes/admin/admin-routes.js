@@ -19,6 +19,7 @@ const {
   editTable,
   deleteTable,
   fetchSpaces,
+  changeTableStatus,
 } = require("../../controllers/admin/tables");
 const upload = require("../../controllers/admin/uploadMiddleWare");
 
@@ -59,6 +60,7 @@ const imageUrl = `/uploads/${req.file.filename}`; // ✅ just the relative path
 router.post("/add-table", addtable);
 router.get("/fetch-tables", fetchAllTables);
 router.put("/update-table/:id", editTable);
+router.put("/change-table-status/:id", changeTableStatus);
 router.delete("/delete-table/:id", deleteTable);
 
 //spaces routes

@@ -1,5 +1,6 @@
 const tableModel = require("../../models/tables");
 const spacesModel = require("../../models/spaces");
+const mongoose = require("mongoose");
 
 const addtable = async (req, res) => {
   try {
@@ -37,7 +38,35 @@ const fetchAllTables = async (req, res) => {
     });
   }
 };
+const changeTableStatus = async (req, res) => {
+  try {
+    const id = req.params.id.trim();
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid table ID" });
+    }
 
+    const { status } = req.body;
+
+    const updatedTable = await tableModel.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedTable) {
+      return res.status(404).json({ success: false, message: "Table not found" });
+    }
+
+    // 🔥 Emit socket event
+    const io = req.app.get("io");
+    io.emit("table-status-changed", updatedTable);
+
+    res.status(200).json({ success: true, data: updatedTable });
+  } catch (error) {
+    console.error("Error updating table:", error);
+    res.status(500).json({ success: false, message: "Error updating table" });
+  }
+};
 const editTable = async (req, res) => {
   try {
     const id = req.params.id;
@@ -129,4 +158,5 @@ module.exports = {
   fetchAllTables,
   editTable,
   deleteTable,
+  changeTableStatus,
 };
