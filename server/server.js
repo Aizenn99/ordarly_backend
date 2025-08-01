@@ -82,7 +82,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 const authRoutes = require("./routes/auth/auth-routes");
 const adminRoutes = require("./routes/admin/admin-routes");
 const staffRoutes = require("./routes/Staff/Staff-routes");
-const kitchenRoutes = require("./routes/Kitchen/kitchen-routes")(io); // If kitchen uses socket
+const kitchenRoutes = require("./routes/Kitchen/kitchen-routes")(io); 
 const dashboardRoutes = require("./routes/dashboard/reports-routes");
 const settingsRoutes = require("./routes/admin/settings-routes");
 
