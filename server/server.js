@@ -85,6 +85,7 @@ const staffRoutes = require("./routes/Staff/Staff-routes");
 const kitchenRoutes = require("./routes/Kitchen/kitchen-routes")(io); // If kitchen uses socket
 const dashboardRoutes = require("./routes/dashboard/reports-routes");
 const settingsRoutes = require("./routes/admin/settings-routes");
+const printRoutes = require("./routes/print/print");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
@@ -92,6 +93,7 @@ app.use("/api/staff", staffRoutes);
 app.use("/api/kitchen", kitchenRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/print", printRoutes);
 
 // ✅ Health check
 app.get("/", (req, res) => {
