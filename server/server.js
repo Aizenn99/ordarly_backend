@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 8000;
 const server = http.createServer(app);
 const io = socketIO(server, {
   cors: {
-    origin: ["https://ordarlyfrontend-production.up.railway.app","http://localhost:5173", "http://192.168.0.4:5173","http://192.168.137.1:5173"],
+    origin: ["https://ordarlyfrontend-production.up.railway.app","http://localhost:5173", "http://192.168.0.4:5173","http://192.168.137.210:5173"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   },
@@ -68,7 +68,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: ["https://ordarlyfrontend-production.up.railway.app","http://localhost:5173", "http://192.168.0.4:5173","http://192.168.137.1:5173"],
+    origin: ["https://ordarlyfrontend-production.up.railway.app","http://localhost:5173", "http://192.168.0.4:5173","http://192.168.137.210:5173"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   })
@@ -86,6 +86,7 @@ const kitchenRoutes = require("./routes/Kitchen/kitchen-routes")(io); // If kitc
 const dashboardRoutes = require("./routes/dashboard/reports-routes");
 const settingsRoutes = require("./routes/admin/settings-routes");
 const printRoutes = require("./routes/print/print");
+const receiptRoutes = require("./routes/admin/receipt-routes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
@@ -94,6 +95,7 @@ app.use("/api/kitchen", kitchenRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/print", printRoutes);
+app.use("/api/receipt", receiptRoutes);
 
 // ✅ Health check
 app.get("/", (req, res) => {
