@@ -69,23 +69,23 @@ const changeTableStatus = async (req, res) => {
 };
 const editTable = async (req, res) => {
   try {
-    const id = req.params.id;
-    const { tableName, capacity, status, spaces } = req.body;
+    const id = req.params.id.trim();
+    console.log("🛠 Updating Table:", id, "with data:", req.body);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid table ID" });
+    }
+
     const updatedTable = await tableModel.findByIdAndUpdate(
       id,
-      {
-        tableName,
-        capacity,
-        status,
-        spaces,
-      },
-      { new: true }
+      { $set: req.body },
+      { new: true, runValidators: true }
     );
+
     if (!updatedTable) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Table not found" });
+      return res.status(404).json({ success: false, message: "Table not found" });
     }
+
     res.status(200).json({
       success: true,
       message: "Table updated successfully!",
@@ -96,6 +96,7 @@ const editTable = async (req, res) => {
     res.status(500).json({ success: false, message: "Error updating table" });
   }
 };
+
 
 const deleteTable = async (req, res) => {
   try {
