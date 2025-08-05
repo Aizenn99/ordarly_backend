@@ -1,19 +1,19 @@
-const KitchenOrder = require("../../models/KitchenOrder");
+// controllers/kitchenOrderController.js
+
+const KitchenOrder      = require("../../models/KitchenOrder");
 const { getNextKOTNumber } = require("../../helper/utils");
-const Cart = require("../../models/ItemCart");
+const Cart              = require("../../models/ItemCart");
 
 // ✅ Send order to kitchen
 exports.sendToKitchen = async (req, res) => {
   try {
     const { tableName, spaceName, guestCount, items, username } = req.body;
-
     if (!tableName || !spaceName || !guestCount || !items || !username) {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
     const kotNumber = await getNextKOTNumber();
-
-    const newOrder = await KitchenOrder.create({
+    const newOrder  = await KitchenOrder.create({
       kotNumber,
       tableName,
       spaceName,
@@ -22,7 +22,7 @@ exports.sendToKitchen = async (req, res) => {
       username,
     });
 
-    // ✅ Emit new KOT to kitchen
+    // Emit new KOT to all kitchen clients
     if (req.io) {
       req.io.emit("new-kot", newOrder);
     }
@@ -37,10 +37,8 @@ exports.sendToKitchen = async (req, res) => {
 // ✅ Mark items as sent
 exports.markKOTItemsSent = async (req, res) => {
   const { tableName } = req.params;
-
   try {
     const cart = await Cart.findOne({ tableName });
-
     if (!cart || !cart.items || cart.items.length === 0) {
       return res.status(404).json({ error: "Cart not found or empty" });
     }
@@ -50,7 +48,6 @@ exports.markKOTItemsSent = async (req, res) => {
         item.sentQuantity = item.quantity;
       }
     });
-
     await cart.save();
 
     res.status(200).json({ message: "Items marked as sent to kitchen" });
@@ -64,7 +61,7 @@ exports.markKOTItemsSent = async (req, res) => {
 exports.getKitchenOrders = async (req, res) => {
   try {
     const orders = await KitchenOrder.find({
-      status: { $in: ["pending", "preparing"] },
+      status: { $in: ["pending", "preparing", "ready"] },
     }).sort({ createdAt: -1 });
 
     res.json(orders);
@@ -74,11 +71,11 @@ exports.getKitchenOrders = async (req, res) => {
   }
 };
 
-// ✅ Update KOT status — no kot-ready emit here
+// ✅ Update KOT status
 exports.updateKOTStatus = async (req, res) => {
   try {
     const { kotNumber } = req.params;
-    const { status } = req.body;
+    const { status }    = req.body;
 
     const validStatus = ["pending", "preparing", "ready"];
     if (!validStatus.includes(status)) {
@@ -90,14 +87,13 @@ exports.updateKOTStatus = async (req, res) => {
       { status },
       { new: true }
     );
-
     if (!updatedOrder) {
       return res.status(404).json({ error: "Kitchen Order not found." });
     }
 
-    // ✅ Emit updated order to all connected clients
+    // Emit the updated order as "new-kot" so all kitchens refresh
     if (req.io) {
-      req.io.emit("kot-ready", updatedOrder); // <-- 👈 This is key
+      req.io.emit("new-kot", updatedOrder);
     }
 
     res.json(updatedOrder);
